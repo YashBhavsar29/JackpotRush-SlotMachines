@@ -8,6 +8,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip winClip;
     [SerializeField] private AudioClip loseClip;
     [SerializeField] private AudioClip errorClip;
+    [SerializeField] private AudioClip buttonClickSFX;
 
     [SerializeField, Range(0f, 1f)]
     private float volume = 1f;
@@ -27,6 +28,11 @@ public class AudioManager : MonoBehaviour
     public void PlayLose() => PlayClip(loseClip);
     public void PlayError() => PlayClip(errorClip);
 
+    public void PlayButtonClick()
+    {
+        if (buttonClickSFX != null)
+            audioSource.PlayOneShot(buttonClickSFX);
+    }
     private void PlayClip(AudioClip clip)
     {
         if (clip != null)
