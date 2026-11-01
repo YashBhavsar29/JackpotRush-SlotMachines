@@ -89,6 +89,22 @@ The project was developed with a focus on both gameplay functionality and mainta
 
 The project was developed incrementally, starting with the core gameplay concept and progressing toward a complete playable experience.
 
+### Initial UI Planning & Concept
+
+Before starting the implementation, I created an initial UI concept to define the overall layout and interaction flow of the slot machine.
+
+The mockup established the placement of the three main areas:
+
+- **Statistics Panel:** Displays the player's balance, current bet, last win, and best win.
+- **Slot Machine Interface:** Contains the reels, primary spin control, and interactive cabinet buttons.
+- **Paytable Panel:** Displays the winning symbol combinations and their respective multipliers.
+
+The concept also included a dedicated menu for selecting betting amounts and accessing additional controls.
+
+This initial design served as a visual reference throughout development. The final implementation evolved from this layout while retaining its core structure and functionality.
+
+![Initial Slot Machine UI Concept](docs/images/00-initial-ui-concept.png)
+
 ### 1. Planning the Core Gameplay
 
 The first step was defining the rules and essential mechanics of a traditional three-reel slot machine.
