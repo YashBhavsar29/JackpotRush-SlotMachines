@@ -25,17 +25,22 @@ public class SlotGameManager : MonoBehaviour
     [Header("Input Events")]
     [SerializeField] private VoidEventChannelSO spinRequested;
     [SerializeField] private IntEventChannelSO betChangeRequested;
+    [SerializeField] private IntEventChannelSO betSelectionRequested;
 
     [Header("UI Events")]
     [SerializeField] private IntEventChannelSO betChanged;
     [SerializeField] private IntEventChannelSO lastWinChanged;
     [SerializeField] private IntEventChannelSO bestWinChanged;
-    [SerializeField] private IntEventChannelSO highBalanceChanged;
     [SerializeField] private BoolEventChannelSO spinStateChanged;
     [SerializeField] private StringEventChannelSO messageChanged;
     [SerializeField] private SpinResultEventChannelSO spinResultCompleted;
-
     [SerializeField] private SpinResultGenerator resultGenerator;
+    [Header("Gameplay Messages")]
+    [SerializeField, Min(2f)]
+    private float randomMessageMinInterval = 2.5f;
+
+    [SerializeField, Min(2f)]
+    private float randomMessageMaxInterval = 4f;
     private readonly WinEvaluator winEvaluator = new WinEvaluator();
     private readonly PayoutCalculator payoutCalculator =
         new PayoutCalculator();
@@ -43,10 +48,32 @@ public class SlotGameManager : MonoBehaviour
     private int currentBet;
     private int lastWin;
     private int bestWin;
-    private int highBalance;
 
     public bool IsSpinning { get; private set; }
     public int CurrentBet => currentBet;
+    private readonly string[] spinningMessages =
+    {
+        "GOOD LUCK!",
+        "FEELING LUCKY?",
+        "HERE WE GO!",
+        "SPIN TO WIN!",
+        "WAIT FOR IT..."
+    };
+
+    private readonly string[] tripleMatchMessages =
+    {
+        "FABULOUS!",
+        "AWESOME!",
+        "INCREDIBLE!",
+        "AMAZING WIN!"
+    };
+
+    private readonly string[] dualMatchMessages =
+    {
+        "NICE ONE!",
+        "GOOD CATCH!",
+        "NOT BAD!"
+    };
 
     private void Awake()
     {
@@ -68,6 +95,9 @@ public class SlotGameManager : MonoBehaviour
 
         if (betChangeRequested != null)
             betChangeRequested.OnEventRaised += ChangeBet;
+
+        if (betSelectionRequested != null)
+            betSelectionRequested.OnEventRaised += SetBet;
     }
 
     private void Start()
@@ -78,12 +108,9 @@ public class SlotGameManager : MonoBehaviour
         foreach (ReelController reel in reels)
             reel.Initialize();
 
-        highBalance = walletManager.Balance;
-
         betChanged?.RaiseEvent(currentBet);
         lastWinChanged?.RaiseEvent(lastWin);
         bestWinChanged?.RaiseEvent(bestWin);
-        highBalanceChanged?.RaiseEvent(highBalance);
         spinStateChanged?.RaiseEvent(true);
     }
 
@@ -94,6 +121,9 @@ public class SlotGameManager : MonoBehaviour
 
         if (betChangeRequested != null)
             betChangeRequested.OnEventRaised -= ChangeBet;
+
+        if (betSelectionRequested != null)
+            betSelectionRequested.OnEventRaised -= SetBet;
     }
 
     private void OnDestroy()
@@ -194,15 +224,26 @@ public class SlotGameManager : MonoBehaviour
             );
         }
 
+        // Random messages can appear while the reels are moving.
+        Coroutine messageCoroutine = StartCoroutine(
+            PlayRandomSpinningMessages()
+        );
+
+        // Wait for all reels to stop.
         for (int i = 0; i < reelCoroutines.Length; i++)
+        {
             yield return reelCoroutines[i];
+        }
+
+        // No more random spinning messages after the reels stop.
+        if (messageCoroutine != null)
+            StopCoroutine(messageCoroutine);
 
         EvaluateResult(result);
 
         IsSpinning = false;
         spinStateChanged?.RaiseEvent(true);
     }
-
 
     private void EvaluateResult(SpinResult result)
     {
@@ -221,26 +262,77 @@ public class SlotGameManager : MonoBehaviour
 
             walletManager.AddCoins(payout);
 
-            messageChanged?.RaiseEvent(
-                $"YOU WIN! {winningSymbol.SymbolName} x{matchCount} +{payout}"
-            );
+            if (matchCount == 3)
+            {
+                messageChanged?.RaiseEvent(
+                    $"TRIPLE MATCH! +{payout}"
+                );
+
+                // A random celebration message follows the result.
+                string celebration = tripleMatchMessages[
+                    Random.Range(0, tripleMatchMessages.Length)
+                ];
+
+                messageChanged?.RaiseEvent(celebration);
+            }
+            else
+            {
+                messageChanged?.RaiseEvent(
+                    $"DUAL MATCH! +{payout}"
+                );
+
+                string celebration = dualMatchMessages[
+                    Random.Range(0, dualMatchMessages.Length)
+                ];
+
+                messageChanged?.RaiseEvent(celebration);
+            }
 
             audioManager?.PlayWin();
         }
         else
         {
+            messageChanged?.RaiseEvent("NO MATCH!");
             messageChanged?.RaiseEvent("TRY AGAIN!");
+
             audioManager?.PlayLose();
         }
 
         lastWin = payout;
         bestWin = Mathf.Max(bestWin, payout);
-        highBalance = Mathf.Max(highBalance, walletManager.Balance);
 
         lastWinChanged?.RaiseEvent(lastWin);
         bestWinChanged?.RaiseEvent(bestWin);
-        highBalanceChanged?.RaiseEvent(highBalance);
 
         spinResultCompleted?.RaiseEvent(result);
+    }
+    private void SetBet(int amount)
+    {
+        if (IsSpinning) return;
+
+        currentBet = Mathf.Clamp(amount, minimumBet, maximumBet);
+        betChanged?.RaiseEvent(currentBet);
+    }
+
+    private IEnumerator PlayRandomSpinningMessages()
+    {
+        while (IsSpinning)
+        {
+            float waitTime = Random.Range(
+                randomMessageMinInterval,
+                randomMessageMaxInterval
+            );
+
+            yield return new WaitForSeconds(waitTime);
+
+            if (!IsSpinning)
+                yield break;
+
+            string message = spinningMessages[
+                Random.Range(0, spinningMessages.Length)
+            ];
+
+            messageChanged?.RaiseEvent(message);
+        }
     }
 }

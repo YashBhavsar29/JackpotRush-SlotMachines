@@ -1,4 +1,5 @@
-
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +19,7 @@ public class SlotUIController : MonoBehaviour
     [Header("Input Events")]
     [SerializeField] private VoidEventChannelSO spinRequested;
     [SerializeField] private IntEventChannelSO betChangeRequested;
+    [SerializeField] private IntEventChannelSO betSelectionRequested;
 
     [Header("Output Events")]
     [SerializeField] private IntEventChannelSO balanceChanged;
@@ -27,6 +29,12 @@ public class SlotUIController : MonoBehaviour
     [SerializeField] private IntEventChannelSO highBalanceChanged;
     [SerializeField] private BoolEventChannelSO spinStateChanged;
     [SerializeField] private StringEventChannelSO messageChanged;
+    [Header("Message Display")]
+    [SerializeField] private float minimumMessageDuration = 2f;
+
+    private readonly Queue<string> messageQueue = new Queue<string>();
+
+    private Coroutine messageDisplayCoroutine;
 
     private void OnEnable()
     {
@@ -74,6 +82,14 @@ public class SlotUIController : MonoBehaviour
 
         if (messageChanged != null)
             messageChanged.OnEventRaised -= ShowMessage;
+
+        if (messageDisplayCoroutine != null)
+        {
+            StopCoroutine(messageDisplayCoroutine);
+            messageDisplayCoroutine = null;
+        }
+
+        messageQueue.Clear();
     }
 
     // UI Button callbacks
@@ -133,7 +149,46 @@ public class SlotUIController : MonoBehaviour
 
     private void ShowMessage(string message)
     {
-        if (messageText != null)
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        messageQueue.Enqueue(message);
+
+        if (messageDisplayCoroutine == null)
+        {
+            messageDisplayCoroutine = StartCoroutine(
+                DisplayMessageQueue()
+            );
+        }
+    }
+    public void SelectBet10G()
+    {
+        betSelectionRequested?.RaiseEvent(10);
+    }
+
+    public void SelectBet50G()
+    {
+        betSelectionRequested?.RaiseEvent(50);
+    }
+
+    public void SelectBet100G()
+    {
+        betSelectionRequested?.RaiseEvent(100);
+    }
+    private IEnumerator DisplayMessageQueue()
+    {
+        while (messageQueue.Count > 0)
+        {
+            string message = messageQueue.Dequeue();
+
             messageText.text = message;
+
+            // Keep every message visible for at least this duration.
+            yield return new WaitForSeconds(
+                Mathf.Max(2f, minimumMessageDuration)
+            );
+        }
+
+        messageDisplayCoroutine = null;
     }
 }
