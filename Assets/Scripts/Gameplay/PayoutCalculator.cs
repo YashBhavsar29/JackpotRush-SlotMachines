@@ -3,13 +3,19 @@ using UnityEngine;
 
 public class PayoutCalculator
 {
-    public int CalculatePayout(int bet, SymbolData symbol)
+    public int CalculatePayout(
+        int bet,
+        SymbolData symbol,
+        int matchCount)
     {
-        if (symbol == null || bet <= 0)
+        if (bet <= 0 || symbol == null)
             return 0;
 
-        return Mathf.RoundToInt(
-            bet * symbol.PayoutMultiplier
-        );
+        float multiplier = symbol.GetMultiplier(matchCount);
+
+        if (multiplier <= 0f)
+            return 0;
+
+        return Mathf.RoundToInt(bet * multiplier);
     }
 }

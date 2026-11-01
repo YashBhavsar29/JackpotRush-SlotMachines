@@ -16,10 +16,7 @@ public class ReelSymbolView : MonoBehaviour
     public void SetSymbol(SymbolData symbol)
     {
         if (symbol == null)
-        {
-            Debug.LogWarning("Cannot display a null symbol.");
             return;
-        }
 
         CurrentSymbol = symbol;
         spriteRenderer.sprite = symbol.SymbolSprite;

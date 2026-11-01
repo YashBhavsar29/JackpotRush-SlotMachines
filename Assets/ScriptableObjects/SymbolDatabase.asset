@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: SymbolDatabase
   m_EditorClassIdentifier: Assembly-CSharp::SymbolDatabase
   symbols:
-  - {fileID: 11400000, guid: 4730e463ef695d5429f1c6f1d897e635, type: 2}
-  - {fileID: 11400000, guid: f00f93d5052d92b45b34327c2f087461, type: 2}
-  - {fileID: 11400000, guid: 89b78a3e78e391947b2a95a3d19efa3f, type: 2}
-  - {fileID: 11400000, guid: c6328f88362b4824ba3508763c5939bb, type: 2}
+  - symbol: {fileID: 11400000, guid: 89b78a3e78e391947b2a95a3d19efa3f, type: 2}
+    occurrenceCount: 5
+  - symbol: {fileID: 11400000, guid: f00f93d5052d92b45b34327c2f087461, type: 2}
+    occurrenceCount: 3
+  - symbol: {fileID: 11400000, guid: 4730e463ef695d5429f1c6f1d897e635, type: 2}
+    occurrenceCount: 2
+  - symbol: {fileID: 11400000, guid: c6328f88362b4824ba3508763c5939bb, type: 2}
+    occurrenceCount: 1

@@ -323,12 +323,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b379fb77ca004564f8ec76519d27a4ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlotUIController
-  gameManager: {fileID: 0}
-  walletManager: {fileID: 0}
-  balanceText: {fileID: 2866873333481519885}
-  betText: {fileID: 0}
+  balanceText: {fileID: 8196010176949708139}
+  betText: {fileID: 5677200619426832809}
+  lastWinText: {fileID: 7316674382653649682}
+  bestWinText: {fileID: 311619081553874630}
+  highBalanceText: {fileID: 2866873333481519885}
   messageText: {fileID: 0}
   spinButton: {fileID: 0}
+  spinRequested: {fileID: 11400000, guid: 44a7a75f315cc3d46b62b7c9b2dfabe3, type: 2}
+  betChangeRequested: {fileID: 11400000, guid: bbd4b129bdd42b949baf06d5c399d19c, type: 2}
+  balanceChanged: {fileID: 11400000, guid: 61000c9cd3c4f124eb58d7665662a1a1, type: 2}
+  betChanged: {fileID: 11400000, guid: 8e06e36b944c2524096d690702314919, type: 2}
+  lastWinChanged: {fileID: 11400000, guid: 132dd95fdda43b8489de472941639a8a, type: 2}
+  bestWinChanged: {fileID: 11400000, guid: 341b4de31c9627d4c9fee0ff3f0fd517, type: 2}
+  highBalanceChanged: {fileID: 11400000, guid: ab3640d87cc9bef4aa0978fd1c759b10, type: 2}
+  spinStateChanged: {fileID: 11400000, guid: 6d47bb6ec00a07a47b4e4876dc5753e2, type: 2}
+  messageChanged: {fileID: 11400000, guid: 46ff9db181257214294f1c8af42ccd86, type: 2}
 --- !u!1 &400195824792719684
 GameObject:
   m_ObjectHideFlags: 0

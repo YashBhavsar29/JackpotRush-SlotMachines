@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3243aa30039f9aa4b98696ad5f5cc650, type: 3}
   m_Name: Bar
   m_EditorClassIdentifier: Assembly-CSharp::SymbolData
-  symbolId: 4
   symbolName: Bar
   symbolSprite: {fileID: 21300000, guid: 9656f7e91fc698544a52069135854ec2, type: 3}
-  payoutMultiplier: 2
-  probabilityWeight: 1
+  pairMultiplier: 3
+  tripleMultiplier: 40

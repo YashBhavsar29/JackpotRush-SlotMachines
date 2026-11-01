@@ -12,104 +12,98 @@ public class ReelController : MonoBehaviour
     [Header("Symbol Configuration")]
     [SerializeField] private SymbolDatabase symbolDatabase;
 
-    [Header("Spin Settings")]
+    [Header("Animation Settings")]
     [SerializeField, Min(0.01f)]
-    private float symbolChangeInterval = 0.05f;
+    private float symbolHeight = 1f;
 
-    private int currentCenterIndex;
+    [SerializeField, Min(0.01f)]
+    private float symbolChangeInterval = 0.08f;
 
     public bool IsSpinning { get; private set; }
 
     public void Initialize()
     {
-        if (symbolDatabase == null ||
-            symbolDatabase.SymbolCount == 0)
-        {
-            Debug.LogError(
-                "Reel has no valid SymbolDatabase.",
-                this
-            );
-
-            return;
-        }
-
-        currentCenterIndex = Random.Range(
-            0,
-            symbolDatabase.SymbolCount
-        );
-
-        UpdateVisibleSymbols();
+        topSymbol.SetSymbol(symbolDatabase.GetRandomSymbol());
+        middleSymbol.SetSymbol(symbolDatabase.GetRandomSymbol());
+        bottomSymbol.SetSymbol(symbolDatabase.GetRandomSymbol());
     }
 
     public IEnumerator SpinTo(
-        int targetIndex,
+        SymbolData finalSymbol,
         float spinDuration,
         float startDelay
     )
     {
-        if (IsSpinning)
-            yield break;
-
-        if (symbolDatabase == null ||
-            symbolDatabase.SymbolCount == 0)
+        if (IsSpinning || finalSymbol == null)
             yield break;
 
         IsSpinning = true;
 
-        // Stagger the stopping of individual reels.
         yield return new WaitForSeconds(startDelay);
 
-        targetIndex = symbolDatabase.WrapIndex(targetIndex);
+        float elapsed = 0f;
 
-        float elapsedTime = 0f;
-
-        // Keep advancing through the fixed sequence.
-        while (elapsedTime < spinDuration)
+        while (elapsed < spinDuration)
         {
-            AdvanceOneStep();
+            yield return AnimateOneStep();
 
-            yield return new WaitForSeconds(
-                symbolChangeInterval
-            );
-
-            elapsedTime += symbolChangeInterval;
+            elapsed += symbolChangeInterval;
         }
 
-        // Continue forward until the predetermined
-        // stopping position is reached.
-        while (currentCenterIndex != targetIndex)
-        {
-            AdvanceOneStep();
-
-            yield return new WaitForSeconds(
-                symbolChangeInterval
-            );
-        }
+        // The predetermined result is always displayed in the centre.
+        middleSymbol.SetSymbol(finalSymbol);
 
         IsSpinning = false;
     }
 
-    private void AdvanceOneStep()
+    private IEnumerator AnimateOneStep()
     {
-        currentCenterIndex = symbolDatabase.WrapIndex(
-            currentCenterIndex + 1
-        );
+        ReelSymbolView oldTop = topSymbol;
+        ReelSymbolView oldMiddle = middleSymbol;
+        ReelSymbolView oldBottom = bottomSymbol;
 
-        UpdateVisibleSymbols();
-    }
+        Vector3 topPosition = oldTop.transform.localPosition;
+        Vector3 middlePosition = oldMiddle.transform.localPosition;
+        Vector3 bottomPosition = oldBottom.transform.localPosition;
 
-    private void UpdateVisibleSymbols()
-    {
-        topSymbol.SetSymbol(
-            symbolDatabase.GetSymbolAt(currentCenterIndex - 1)
-        );
+        Vector3 targetTop = topPosition + Vector3.down * symbolHeight;
+        Vector3 targetMiddle = middlePosition + Vector3.down * symbolHeight;
+        Vector3 targetBottom = bottomPosition + Vector3.down * symbolHeight;
 
-        middleSymbol.SetSymbol(
-            symbolDatabase.GetSymbolAt(currentCenterIndex)
-        );
+        float elapsed = 0f;
 
-        bottomSymbol.SetSymbol(
-            symbolDatabase.GetSymbolAt(currentCenterIndex + 1)
-        );
+        while (elapsed < symbolChangeInterval)
+        {
+            elapsed += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsed / symbolChangeInterval);
+
+            oldTop.transform.localPosition =
+                Vector3.Lerp(topPosition, targetTop, t);
+
+            oldMiddle.transform.localPosition =
+                Vector3.Lerp(middlePosition, targetMiddle, t);
+
+            oldBottom.transform.localPosition =
+                Vector3.Lerp(bottomPosition, targetBottom, t);
+
+            yield return null;
+        }
+
+        // Wrap the bottom symbol to the top.
+        oldBottom.transform.localPosition = topPosition;
+
+        // Assign a new random symbol as it re-enters.
+        oldBottom.SetSymbol(symbolDatabase.GetRandomSymbol());
+
+        // Rotate the references to match their new positions.
+        topSymbol = oldBottom;
+        middleSymbol = oldTop;
+        bottomSymbol = oldMiddle;
+
+        // Correct final positions to avoid accumulated drift.
+        topSymbol.transform.localPosition = topPosition;
+        middleSymbol.transform.localPosition = middlePosition;
+        bottomSymbol.transform.localPosition = bottomPosition;
     }
 }

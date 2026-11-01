@@ -1,20 +1,21 @@
 
-using System;
 using UnityEngine;
 
 public class WalletManager : MonoBehaviour
 {
-    [SerializeField, Min(0)]
-    private int startingBalance = 1000;
+    [SerializeField] private int startingBalance = 1000;
+    [SerializeField] private IntEventChannelSO balanceChanged;
 
     public int Balance { get; private set; }
-
-    public event Action<int> OnBalanceChanged;
 
     private void Awake()
     {
         Balance = startingBalance;
-        NotifyBalanceChanged();
+    }
+
+    private void Start()
+    {
+        balanceChanged?.RaiseEvent(Balance);
     }
 
     public bool TrySpend(int amount)
@@ -23,7 +24,7 @@ public class WalletManager : MonoBehaviour
             return false;
 
         Balance -= amount;
-        NotifyBalanceChanged();
+        balanceChanged?.RaiseEvent(Balance);
 
         return true;
     }
@@ -34,11 +35,6 @@ public class WalletManager : MonoBehaviour
             return;
 
         Balance += amount;
-        NotifyBalanceChanged();
-    }
-
-    private void NotifyBalanceChanged()
-    {
-        OnBalanceChanged?.Invoke(Balance);
+        balanceChanged?.RaiseEvent(Balance);
     }
 }

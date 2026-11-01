@@ -8,20 +8,29 @@ using UnityEngine;
 public class SymbolData : ScriptableObject
 {
     [Header("Symbol Information")]
-    [SerializeField] private string symbolId;
     [SerializeField] private string symbolName;
     [SerializeField] private Sprite symbolSprite;
 
-    [Header("Gameplay Settings")]
-    [SerializeField, Min(0.01f)]
-    private float payoutMultiplier = 2f;
+    [Header("Payout Multipliers")]
+    [SerializeField, Min(0f)]
+    private float pairMultiplier = 1f;
 
-    [SerializeField, Min(0.01f)]
-    private float probabilityWeight = 1f;
+    [SerializeField, Min(0f)]
+    private float tripleMultiplier = 5f;
 
-    public string SymbolId => symbolId;
     public string SymbolName => symbolName;
     public Sprite SymbolSprite => symbolSprite;
-    public float PayoutMultiplier => payoutMultiplier;
-    public float ProbabilityWeight => probabilityWeight;
+
+    public float PairMultiplier => pairMultiplier;
+    public float TripleMultiplier => tripleMultiplier;
+
+    public float GetMultiplier(int matchCount)
+    {
+        return matchCount switch
+        {
+            2 => pairMultiplier,
+            3 => tripleMultiplier,
+            _ => 0f
+        };
+    }
 }

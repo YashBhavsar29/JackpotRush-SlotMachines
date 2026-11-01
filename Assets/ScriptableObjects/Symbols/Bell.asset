@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3243aa30039f9aa4b98696ad5f5cc650, type: 3}
   m_Name: Bell
   m_EditorClassIdentifier: Assembly-CSharp::SymbolData
-  symbolId: 3
   symbolName: Bell
   symbolSprite: {fileID: 21300000, guid: d1fee83862a059e418509a90f10e7bf7, type: 3}
-  payoutMultiplier: 2
-  probabilityWeight: 1
+  pairMultiplier: 2
+  tripleMultiplier: 15

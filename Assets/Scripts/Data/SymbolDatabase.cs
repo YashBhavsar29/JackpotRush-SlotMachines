@@ -9,40 +9,68 @@ using UnityEngine;
 )]
 public class SymbolDatabase : ScriptableObject
 {
-    [Header("Fixed Reel Symbol Sequence")]
-    [SerializeField] private List<SymbolData> symbols = new();
-
-    public int SymbolCount => symbols.Count;
-
-    public SymbolData GetSymbolAt(int index)
+    [Serializable]
+    public class SymbolEntry
     {
-        if (symbols == null || symbols.Count == 0)
-            throw new InvalidOperationException(
-                "Symbol database is empty."
-            );
+        public SymbolData symbol;
 
-        return symbols[WrapIndex(index)];
+        [Min(0)]
+        public int occurrenceCount = 1;
     }
 
-    public int WrapIndex(int index)
+    [SerializeField] private List<SymbolEntry> symbols = new();
+
+    public IReadOnlyList<SymbolEntry> Symbols => symbols;
+
+    public int TotalOccurrences
     {
-        return (index % symbols.Count + symbols.Count) % symbols.Count;
+        get
+        {
+            int total = 0;
+
+            foreach (SymbolEntry entry in symbols)
+            {
+                if (entry.symbol != null)
+                    total += Mathf.Max(0, entry.occurrenceCount);
+            }
+
+            return total;
+        }
+    }
+
+    public SymbolData GetRandomSymbol()
+    {
+        int total = TotalOccurrences;
+
+        if (total <= 0)
+            throw new InvalidOperationException(
+                "SymbolDatabase has no valid symbol occurrences."
+            );
+
+        int randomValue = UnityEngine.Random.Range(0, total);
+
+        foreach (SymbolEntry entry in symbols)
+        {
+            if (entry.symbol == null || entry.occurrenceCount <= 0)
+                continue;
+
+            randomValue -= entry.occurrenceCount;
+
+            if (randomValue < 0)
+                return entry.symbol;
+        }
+
+        throw new InvalidOperationException(
+            "Unable to select a symbol."
+        );
     }
 
     private void OnValidate()
     {
-        if (symbols == null)
-            return;
-
-        for (int i = 0; i < symbols.Count; i++)
-        {
-            if (symbols[i] == null)
-            {
-                Debug.LogWarning(
-                    $"Symbol at index {i} is missing.",
-                    this
-                );
-            }
-        }
+        if (TotalOccurrences <= 0)
+            Debug.LogWarning(
+                "SymbolDatabase needs at least one valid occurrence.",
+                this
+            );
     }
 }

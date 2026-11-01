@@ -6,36 +6,47 @@ public class SlotGameManager : MonoBehaviour
 {
     public static SlotGameManager Instance { get; private set; }
 
-    [Header("Gameplay References")]
+    [Header("Gameplay Components")]
     [SerializeField] private ReelController[] reels;
-    [SerializeField] private SpinResultGenerator resultGenerator;
     [SerializeField] private WalletManager walletManager;
     [SerializeField] private LeverController leverController;
-    [SerializeField] private SlotUIController uiController;
+    [SerializeField] private AudioManager audioManager;
 
-    [Header("Spin Settings")]
-    [SerializeField, Min(0.1f)]
-    private float spinDuration = 2f;
+    [Header("Configuration")]
+    [SerializeField] private SymbolDatabase symbolDatabase;
+    [SerializeField, Min(0.1f)] private float spinDuration = 2f;
+    [SerializeField, Min(0f)] private float reelStopDelay = 0.4f;
+    [SerializeField, Min(0f)] private float leverToReelDelay = 0.35f;
+    [SerializeField] private int startingBet = 10;
+    [SerializeField] private int minimumBet = 10;
+    [SerializeField] private int maximumBet = 100;
+    [SerializeField] private int betIncrement = 10;
 
-    [SerializeField, Min(0f)]
-    private float reelStopDelay = 0.4f;
+    [Header("Input Events")]
+    [SerializeField] private VoidEventChannelSO spinRequested;
+    [SerializeField] private IntEventChannelSO betChangeRequested;
 
-    [SerializeField, Min(0f)]
-    private float leverToReelDelay = 0.35f;
+    [Header("UI Events")]
+    [SerializeField] private IntEventChannelSO betChanged;
+    [SerializeField] private IntEventChannelSO lastWinChanged;
+    [SerializeField] private IntEventChannelSO bestWinChanged;
+    [SerializeField] private IntEventChannelSO highBalanceChanged;
+    [SerializeField] private BoolEventChannelSO spinStateChanged;
+    [SerializeField] private StringEventChannelSO messageChanged;
+    [SerializeField] private SpinResultEventChannelSO spinResultCompleted;
 
-    [Header("Bet Settings")]
-    [SerializeField, Min(1)]
-    private int currentBet = 10;
-
-    private bool isSpinning;
-
-    private WinEvaluator winEvaluator;
-
+    [SerializeField] private SpinResultGenerator resultGenerator;
+    private readonly WinEvaluator winEvaluator = new WinEvaluator();
     private readonly PayoutCalculator payoutCalculator =
         new PayoutCalculator();
 
+    private int currentBet;
+    private int lastWin;
+    private int bestWin;
+    private int highBalance;
+
+    public bool IsSpinning { get; private set; }
     public int CurrentBet => currentBet;
-    public bool IsSpinning => isSpinning;
 
     private void Awake()
     {
@@ -46,56 +57,43 @@ public class SlotGameManager : MonoBehaviour
         }
 
         Instance = this;
+
+        currentBet = startingBet;
+    }
+
+    private void OnEnable()
+    {
+        if (spinRequested != null)
+            spinRequested.OnEventRaised += Spin;
+
+        if (betChangeRequested != null)
+            betChangeRequested.OnEventRaised += ChangeBet;
     }
 
     private void Start()
     {
-        if (reels == null || reels.Length != 3)
-        {
-            Debug.LogError(
-                "SlotGameManager requires exactly three reels.",
-                this
-            );
-
-            enabled = false;
+        if (!ValidateConfiguration())
             return;
-        }
-
-        if (resultGenerator == null || walletManager == null)
-        {
-            Debug.LogError(
-                "Missing required gameplay references.",
-                this
-            );
-
-            enabled = false;
-            return;
-        }
-
-        if (resultGenerator.SymbolDatabase == null)
-        {
-            Debug.LogError("SymbolDatabase is missing.", this);
-            enabled = false;
-            return;
-        }
 
         foreach (ReelController reel in reels)
-        {
-            if (reel == null)
-            {
-                Debug.LogError("A ReelController reference is missing.");
-                enabled = false;
-                return;
-            }
-
             reel.Initialize();
-        }
 
-        winEvaluator = new WinEvaluator(
-            resultGenerator.SymbolDatabase
-        );
+        highBalance = walletManager.Balance;
 
-        uiController?.UpdateBet(currentBet);
+        betChanged?.RaiseEvent(currentBet);
+        lastWinChanged?.RaiseEvent(lastWin);
+        bestWinChanged?.RaiseEvent(bestWin);
+        highBalanceChanged?.RaiseEvent(highBalance);
+        spinStateChanged?.RaiseEvent(true);
+    }
+
+    private void OnDisable()
+    {
+        if (spinRequested != null)
+            spinRequested.OnEventRaised -= Spin;
+
+        if (betChangeRequested != null)
+            betChangeRequested.OnEventRaised -= ChangeBet;
     }
 
     private void OnDestroy()
@@ -104,32 +102,67 @@ public class SlotGameManager : MonoBehaviour
             Instance = null;
     }
 
-    public void SetBet(int amount)
+    private bool ValidateConfiguration()
     {
-        if (isSpinning || amount <= 0)
-            return;
+        if (reels == null || reels.Length != 3 ||
+            walletManager == null || symbolDatabase == null ||
+            symbolDatabase.TotalOccurrences <= 0)
+        {
+            Debug.LogError(
+                "SlotGameManager has an invalid configuration.",
+                this
+            );
 
-        currentBet = amount;
+            enabled = false;
+            return false;
+        }
 
-        uiController?.UpdateBet(currentBet);
+        foreach (ReelController reel in reels)
+        {
+            if (reel == null)
+            {
+                Debug.LogError("A reel reference is missing.", this);
+                enabled = false;
+                return false;
+            }
+        }
+
+        if (resultGenerator == null)
+        {
+            Debug.LogError("Result generator could not be initialized.", this);
+            enabled = false;
+            return false;
+        }
+
+        return true;
     }
 
-    public void Spin()
+    private void ChangeBet(int direction)
     {
-        if (isSpinning)
+        if (IsSpinning)
             return;
 
-        if (reels == null || reels.Length != 3)
+        currentBet = Mathf.Clamp(
+            currentBet + direction * betIncrement,
+            minimumBet,
+            maximumBet
+        );
+
+        betChanged?.RaiseEvent(currentBet);
+    }
+
+    private void Spin()
+    {
+        if (IsSpinning)
             return;
 
         if (!walletManager.TrySpend(currentBet))
         {
-            uiController?.ShowMessage("Insufficient balance!");
-            AudioManager.Instance?.PlayError();
+            messageChanged?.RaiseEvent("INSUFFICIENT BALANCE");
+            audioManager?.PlayError();
             return;
         }
 
-        // Determine the final result before animation.
         SpinResult result =
             resultGenerator.GenerateResult(reels.Length);
 
@@ -138,71 +171,76 @@ public class SlotGameManager : MonoBehaviour
 
     private IEnumerator PlaySpin(SpinResult result)
     {
-        isSpinning = true;
+        IsSpinning = true;
 
-        uiController?.SetSpinInteractable(false);
-        uiController?.ShowMessage("Spinning...");
+        spinStateChanged?.RaiseEvent(false);
+        messageChanged?.RaiseEvent("SPINNING...");
 
-        // Pull lever and play the complete spin sound.
         leverController?.PullLever();
-        AudioManager.Instance?.PlayLeverPull();
+        audioManager?.PlaySpin();
 
-        // Wait before starting the reels.
         yield return new WaitForSeconds(leverToReelDelay);
 
-        // Start all reels with staggered stopping delays.
-        Coroutine[] reelCoroutines =
-            new Coroutine[reels.Length];
+        Coroutine[] reelCoroutines = new Coroutine[reels.Length];
 
         for (int i = 0; i < reels.Length; i++)
         {
-            float stopDelay = i * reelStopDelay;
-
             reelCoroutines[i] = StartCoroutine(
                 reels[i].SpinTo(
-                    result.GetStopIndex(i),
+                    result.GetSymbol(i),
                     spinDuration,
-                    stopDelay
+                    i * reelStopDelay
                 )
             );
         }
 
-        // Wait until all reels have stopped.
         for (int i = 0; i < reelCoroutines.Length; i++)
-        {
             yield return reelCoroutines[i];
-        }
 
         EvaluateResult(result);
 
-        isSpinning = false;
-
-        uiController?.SetSpinInteractable(true);
+        IsSpinning = false;
+        spinStateChanged?.RaiseEvent(true);
     }
+
 
     private void EvaluateResult(SpinResult result)
     {
+        int payout = 0;
+
         if (winEvaluator.TryEvaluate(
             result,
-            out SymbolData winningSymbol))
+            out SymbolData winningSymbol,
+            out int matchCount))
         {
-            int payout = payoutCalculator.CalculatePayout(
+            payout = payoutCalculator.CalculatePayout(
                 currentBet,
-                winningSymbol
+                winningSymbol,
+                matchCount
             );
 
             walletManager.AddCoins(payout);
 
-            uiController?.ShowMessage(
-                $"YOU WIN! +{payout}"
+            messageChanged?.RaiseEvent(
+                $"YOU WIN! {winningSymbol.SymbolName} x{matchCount} +{payout}"
             );
 
-            AudioManager.Instance?.PlayWin();
+            audioManager?.PlayWin();
         }
         else
         {
-            uiController?.ShowMessage("Try Again!");
-            AudioManager.Instance?.PlayLose();
+            messageChanged?.RaiseEvent("TRY AGAIN!");
+            audioManager?.PlayLose();
         }
+
+        lastWin = payout;
+        bestWin = Mathf.Max(bestWin, payout);
+        highBalance = Mathf.Max(highBalance, walletManager.Balance);
+
+        lastWinChanged?.RaiseEvent(lastWin);
+        bestWinChanged?.RaiseEvent(bestWin);
+        highBalanceChanged?.RaiseEvent(highBalance);
+
+        spinResultCompleted?.RaiseEvent(result);
     }
 }

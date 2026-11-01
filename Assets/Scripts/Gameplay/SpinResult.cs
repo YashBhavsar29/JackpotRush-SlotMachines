@@ -1,21 +1,17 @@
 
-using System.Collections.Generic;
-
 public class SpinResult
 {
-    private readonly List<int> stopIndices;
+    public SymbolData[] Symbols { get; }
 
-    public IReadOnlyList<int> StopIndices => stopIndices;
-
-    public SpinResult(List<int> indices)
+    public SpinResult(SymbolData[] symbols)
     {
-        stopIndices = new List<int>(indices);
+        Symbols = symbols;
     }
 
-    public int GetStopIndex(int reelIndex)
+    public SymbolData GetSymbol(int index)
     {
-        return stopIndices[reelIndex];
+        return Symbols[index];
     }
 
-    public int ReelCount => stopIndices.Count;
+    public int ReelCount => Symbols.Length;
 }
