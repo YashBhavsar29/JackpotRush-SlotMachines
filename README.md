@@ -3,46 +3,70 @@
 <p align="center">
   <strong>A retro-inspired slot machine game built with Unity and C#.</strong>
   <br/>
-  Designed around modular gameplay systems, event-driven communication, and a classic casino-inspired experience.
+  Featuring animated reels, betting mechanics, symbol-based payouts, and an event-driven architecture.
+</p>
+
+<p align="center">
+  <a href="https://play.unity.com/en/games/c9e28b48-17f2-4825-bd8b-9a24df0d78a8/web">
+    <img src="https://img.shields.io/badge/PLAY%20GAME-Unity%20Play-4B32C3?style=for-the-badge&logo=unity&logoColor=white" alt="Play on Unity"/>
+  </a>
+  <a href="https://youtu.be/wa_QWqaYWis">
+    <img src="https://img.shields.io/badge/WATCH-GAMEPLAY%20VIDEO-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch gameplay"/>
+  </a>
 </p>
 
 ---
 
 ## 🎮 Gameplay Showcase
 
-<!-- Replace the URL below with your full gameplay video link -->
-
 <p align="center">
-  <a href="YOUR_GAMEPLAY_VIDEO_URL">
-    <img src="docs/images/04-final-gameplay.png" alt="Jackpot Rush gameplay preview" width="850"/>
+  <a href="https://youtu.be/wa_QWqaYWis">
+    <img src="https://img.youtube.com/vi/wa_QWqaYWis/maxresdefault.jpg" alt="Jackpot Rush gameplay video" width="850"/>
   </a>
   <br/>
-  <em>Click the preview to watch the full gameplay video.</em>
+  <em>Watch the complete gameplay demonstration.</em>
 </p>
+
+<p align="center">
+  <a href="https://play.unity.com/en/games/c9e28b48-17f2-4825-bd8b-9a24df0d78a8/web">
+    <strong>▶ PLAY JACKPOT RUSH ONLINE</strong>
+  </a>
+</p>
+
+**The game is published on Unity Play and can be played directly in your browser without downloading the Unity project.**
 
 ---
 
+## 🎯 Project Context
+
+This project was developed as part of the submission for **Underpin Services' Unity Development Intern hiring process**.
+
+The assignment provided an opportunity to demonstrate practical Unity development skills, including gameplay programming, system architecture, UI implementation, animation, audio integration, and building a complete playable WebGL experience.
+
+The project was developed with an emphasis on clean code, modular systems, and maintainable architecture.
+
 ## 📌 About the Project
 
-**Jackpot Rush** is a 2D slot machine game developed using Unity and C#. The project focuses on recreating the experience of a traditional slot machine with a retro pixel-art visual style, animated reels, betting mechanics, symbol-based payouts, and interactive cabinet controls.
+Jackpot Rush is a 2D slot machine game developed using Unity and C#. Inspired by traditional casino slot machines, the game combines a retro pixel-art visual style with interactive controls, animated reels, betting mechanics, and symbol-based payouts.
 
-The goal was not just to build a working slot machine, but also to structure the project using maintainable and reusable gameplay systems.
+The project was developed with a focus on both gameplay functionality and maintainable software architecture. Individual systems handle reel animations, result generation, win evaluation, payout calculation, wallet management, audio, and UI communication.
 
 ### Key Features
 
-- Three animated reels with randomly generated outcomes.
+- Three animated reels with three visible symbols each.
 - Four symbols: Seven, BAR, Bell, and Cherry.
 - Pair and triple matching combinations.
-- Configurable symbol probabilities through a Symbol Database.
-- Paytable-based payout calculations.
+- Weighted random symbol generation.
+- Configurable paytable-based payouts.
 - Custom bet selection: 10G, 50G, and 100G.
-- Balance, current bet, last win, best win, and high balance tracking.
+- Balance, last win, best win, and high balance tracking.
 - Persistent high balance using PlayerPrefs.
 - Interactive cabinet lever and world-space controls.
-- Menu panel for selecting betting amounts.
-- Event-driven UI communication using ScriptableObject event channels.
-- Audio feedback for spins, wins, losses, errors, and button interactions.
-- Retro-inspired pixel-art interface and animated CRT-style message display.
+- Menu panel for betting options.
+- ScriptableObject-based event-driven communication.
+- Gameplay and UI sound effects.
+- Retro-inspired pixel-art interface.
+- Animated CRT-style message display.
 
 ---
 
@@ -52,24 +76,24 @@ The goal was not just to build a working slot machine, but also to structure the
 |---|---|
 | Unity 6 | Game development |
 | C# | Gameplay programming |
-| Unity UI | Interactive UI elements |
+| Unity UI | Interactive UI |
 | TextMeshPro | Text rendering |
 | ScriptableObjects | Game data and event channels |
 | Animator | Lever animation |
-| PlayerPrefs | High balance persistence |
+| PlayerPrefs | Local high balance persistence |
 | Git & GitHub | Version control |
 
 ---
 
 ## 🚀 Development Journey
 
-The project was developed incrementally, starting with the core gameplay concept and gradually integrating the gameplay systems, UI, and visual presentation.
+The project was developed incrementally, starting with the core gameplay concept and progressing toward a complete playable experience.
 
 ### 1. Planning the Core Gameplay
 
-The initial focus was defining the rules and essential mechanics of a traditional three-reel slot machine.
+The first step was defining the rules and essential mechanics of a traditional three-reel slot machine.
 
-The main gameplay requirements were:
+The core requirements included:
 
 - Three reels, each displaying three visible symbols.
 - Random symbol generation for every spin.
@@ -78,11 +102,11 @@ The main gameplay requirements were:
 - Three matching symbols result in a triple payout.
 - Betting amounts determine the final payout.
 
-The paytable was defined before implementing the payout logic.
+The paytable and gameplay rules were established before implementing the payout logic.
 
 ### 2. Building the Slot Machine
 
-The next stage involved assembling the main slot machine environment in Unity.
+The next stage involved assembling the slot machine environment in Unity.
 
 This included:
 - Creating the cabinet and its visual structure.
@@ -93,20 +117,19 @@ This included:
 
 ![Slot Machine Scene Setup](docs/images/01-slot-machine-scene.png)
 
-### 3. Implementing the Gameplay Systems
+### 3. Implementing Gameplay Systems
 
-The gameplay logic was separated into smaller responsibilities rather than placing everything inside one large manager.
+The gameplay logic was divided into smaller responsibilities rather than placing everything inside one large manager.
 
-The primary systems include:
-
-- **SlotGameManager:** Coordinates the overall spin process and gameplay flow.
-- **ReelController:** Handles the animation and final symbol display of an individual reel.
-- **SpinResultGenerator:** Generates random outcomes using the configured symbol distribution.
-- **WinEvaluator:** Determines whether the result contains a winning combination.
-- **PayoutCalculator:** Calculates the payout using the bet amount and paytable.
-- **WalletManager:** Manages the player's balance and high balance.
-
-This separation makes individual systems easier to maintain and modify.
+| Component | Responsibility |
+|---|---|
+| SlotGameManager | Coordinates the overall gameplay and spin process |
+| ReelController | Handles individual reel animations and final symbols |
+| SpinResultGenerator | Generates random outcomes using symbol probabilities |
+| WinEvaluator | Identifies pair and triple matches |
+| PayoutCalculator | Calculates rewards using the paytable |
+| WalletManager | Manages player balance and high balance |
+| AudioManager | Handles gameplay and UI sound effects |
 
 ### 4. Designing the Game Architecture
 
@@ -114,24 +137,15 @@ As the number of gameplay and UI systems increased, communication between compon
 
 ScriptableObject-based event channels were introduced to decouple the UI from gameplay logic.
 
-The UI raises events for player input, while gameplay systems publish events when values or game states change.
+The UI raises events for player input, while gameplay systems publish events whenever values or game states change.
 
 This avoids unnecessary direct references between UI components and gameplay managers.
 
-<details>
-<summary><strong>View the interactive architecture diagram</strong></summary>
-
-[Open the complete architecture diagram in Mermaid Live](https://mermaid.live/)
-
-The architecture diagram shows the main GameObjects, their attached components, game data, and event-channel communication.
-
-</details>
-
-<iframe src="https://mermaid.live/embed?theme=redux-color&look=classic&mode=light&controls=0#pako:eNqNVY1u2zYQfhVCQYEOU9bF9prOGArIsuAJkGIjlhdkVTHQ0skmQpOeSGUN2j7HHqgvVv5IbkIp3QwY8B3vu5-P39EfvYKX4E29ivJ_ij2uJcpmeZ0z_UXqI5rtrsbHPVoEabRKgtt3ubfABzhS_JB777sw_Vmk7VmKGd5B_du2fvV2Tbl85EMv14TtKEjOfrDnR8KuQTRULoBBjSWvnbQ3QZJEmUp9g6kCGpT92eZ04q-jKFmr8GsAKkz0GH35F2kz5EzWXEFdTBjM4itTJMRbwtoqCdxD_Q2DfkQBI4eBFoPNPF4qcNCUhD-e3jjWvKkLeAQBVg5SvIlVjk3sJF8ny8ycaCpVzInWTfzsPGl0tVGIFFiDVpgBNSBtGutZ3Dxet3ecpSs0J0JfsyVRGQXP4IMc4OC5gaI_oqtM30V0D0yicI-Zqi6covHVaqOpj8K_rBr-bkBIKE1Z5ZyB1MgdDJ2sgUIhCf8Gc7IvN9kp_QxTzAqw2fr5T54EC3lDWC9uyPs72e2H8-ph1hJL15-CEEohrfd_0DgPsqBdLTTHErsCuU1nSyP59cNhy6kO2WIBVignl4NaBbdZMEsiBVvhB4Wg4EQky0Uc6r0jLLrHtNGXbnKqeN7IENOiod9XwosXqHssUA0V1KBoEt3pIkXn52_twjo-u_SOs91Sx2uWz_GZ1h1fS1PnNSHmoGPCaXwTI8KOjexcdg814pN6XDARahDvk1VvF6P3ro1QqkKiEye6Jxj1d9ZBG6OFJ0RpmZkKi7TfmeL_UWt2widtWdl3AZbOrjOrVvQKae2i1uyDrNXvxxLRp6V7PZxu9aszwM_yCEy1EFIuTG195CDN6-nW-cnO0Ej1F4KWLKSkuNP4JzKwdf4ztAsvKBZiDhXadWKtCKXTs8mv48nlpV9wyuvpWVVVvlB3dwfTM3z5ZlvhHr4hLfLyYlxdjIaQ1XZbjSY9JJgX0oIvXk_g9XgIPBqVY4AeuFTr3WEnv4xH5RB2gkt483NvbCUe38rDN4vot1vmG5ZOjDzF2MvwNc1-e-tq9qcxRs1-KyIznpPD7qPfrZ9vN1LP4vnerialN5V1A753gPqAtel9zD25h4MSzDT3aiibD-dm0tzzc49yfmcOTH5S5N5nleiI2Z-cH7pcNW92e29aYSqU1RxVOZgTrB7aNuTzV9wl4VE" width="100%" height="480" loading="lazy" title="Jackpot Rush architecture diagram" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+![Jackpot Rush Game Architecture](docs/images/05-game-architecture.png)
 
 **Architecture highlights:**
 
-- `SlotGameManager` is the central gameplay coordinator and the only Singleton.
+- `SlotGameManager` acts as the central gameplay coordinator and the only Singleton.
 - `WalletManager` manages balance and persistent high balance.
 - Each reel has its own `ReelController`.
 - `SlotUIController` communicates with gameplay through event channels.
@@ -139,7 +153,7 @@ The architecture diagram shows the main GameObjects, their attached components, 
 - `AudioManager` handles gameplay and UI sound effects.
 - `WinEvaluator` and `PayoutCalculator` are separate logic classes.
 
-### 5. Building the UI and Statistics Panel
+### 5. Designing the UI and Statistics Panel
 
 After the core gameplay systems were in place, the player-facing interface was developed.
 
@@ -178,12 +192,12 @@ The payout calculator uses the configured paytable to determine the correct mult
 
 ### 7. Integrating Controls, Audio and Persistence
 
-The final integration stage connected the gameplay, UI, cabinet controls, and audio systems.
+The final integration stage connected gameplay, UI, cabinet controls, and audio systems.
 
 This included:
 
 - Adding preset betting options through the menu panel.
-- Connecting the cabinet controls to their respective actions.
+- Connecting cabinet controls to their respective actions.
 - Adding button-click audio feedback.
 - Playing spin, win, loss, and error sounds.
 - Persisting the highest balance using PlayerPrefs.
@@ -192,11 +206,23 @@ This included:
 
 ![Final Gameplay](docs/images/04-final-gameplay.png)
 
+### 8. Publishing the WebGL Build
+
+Once the gameplay and UI systems were integrated, the project was exported as a WebGL build.
+
+The exported build was published on Unity Play, making the game accessible directly through a web browser.
+
+**Play the published game:**
+
+[Jackpot Rush – Unity Play](https://play.unity.com/en/games/c9e28b48-17f2-4825-bd8b-9a24df0d78a8/web)
+
+**Watch the gameplay demonstration:**
+
+[Jackpot Rush – YouTube](https://youtu.be/wa_QWqaYWis)
+
 ---
 
 ## 💻 Code Highlights
-
-A few examples of the implementation approach used in the project.
 
 ### 1. Event-Driven Communication
 
@@ -232,20 +258,13 @@ if (first == second && second == third)
     matchCount = 3;
     return true;
 }
-
-if (first == second)
-    winningSymbol = first;
-else if (first == third)
-    winningSymbol = first;
-else if (second == third)
-    winningSymbol = second;
 ```
 
 Checking triples first ensures that a triple match is not incorrectly evaluated as a pair.
 
 ### 3. Persistent High Balance
 
-The high balance is loaded from PlayerPrefs and updated whenever the player's balance exceeds the previous record.
+The high balance is updated whenever the player's balance exceeds the previous record.
 
 ```csharp
 if (Balance > HighBalance)
@@ -259,11 +278,11 @@ if (Balance > HighBalance)
 }
 ```
 
-This preserves the highest recorded balance across normal game sessions on the same browser/device storage.
+This preserves the highest recorded balance across normal sessions on the same browser/device storage.
 
-### 4. Playing Button Sounds
+### 4. Button Sound Effects
 
-Button interactions use `PlayOneShot()` so that UI sounds do not interrupt other audio playback.
+Button interactions use `PlayOneShot()` so UI sounds do not interrupt other audio playback.
 
 ```csharp
 public void PlayButtonClick()
@@ -309,14 +328,16 @@ Assets/
 └── UI/
 
 docs/
-└── images/
-    ├── 01-slot-machine-scene.png
-    ├── 02-statistics-panel.png
-    ├── 03-paytable-design.png
-    └── 04-final-gameplay.png
+├── images/
+│   ├── 01-slot-machine-scene.png
+│   ├── 02-statistics-panel.png
+│   ├── 03-paytable-design.png
+│   ├── 04-final-gameplay.png
+│   └── 05-game-architecture.png
+└── videos/
 ```
 
-*The script subfolder names above are illustrative; adjust them to match the actual repository.*
+*Adjust the folder names to match the actual repository structure.*
 
 ---
 
@@ -329,10 +350,10 @@ docs/
 
 ### Setup
 
-1. Clone this repository:
+1. Clone the repository:
 
    ```bash
-   git clone YOUR_REPOSITORY_URL
+   git clone https://github.com/YashBhavsar29/JackpotRush-SlotMachines.git
    ```
 
 2. Open Unity Hub.
@@ -344,13 +365,13 @@ docs/
 
 ---
 
-## 🔮 Possible Future Improvements
+## 🔮 Future Improvements
 
-- Additional symbols and configurable paytable combinations.
+- Additional symbols and configurable payout combinations.
 - More detailed spin and reel-stop animations.
 - Improved visual feedback for winning combinations.
 - Additional gameplay modes.
-- Improved audio and visual effects.
+- Further audio and visual effects.
 
 ---
 
@@ -367,4 +388,8 @@ Game Developer | Unity & C#
 
 <p align="center">
   <strong>Built with Unity, C#, and a lot of spins. 🎰</strong>
+  <br/>
+  <a href="https://play.unity.com/en/games/c9e28b48-17f2-4825-bd8b-9a24df0d78a8/web">Play the Game</a>
+  &nbsp;•&nbsp;
+  <a href="https://youtu.be/wa_QWqaYWis">Watch Gameplay</a>
 </p>
