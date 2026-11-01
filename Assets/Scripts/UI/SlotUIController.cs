@@ -40,13 +40,13 @@ public class SlotUIController : MonoBehaviour
     public void UpdateBalance(int balance)
     {
         if (balanceText != null)
-            balanceText.text = $"Balance: {balance}";
+            balanceText.text = $"{balance}";
     }
 
     public void UpdateBet(int amount)
     {
         if (betText != null)
-            betText.text = $"Bet: {amount}";
+            betText.text = $"{amount}G";
     }
 
     public void ShowMessage(string message)
